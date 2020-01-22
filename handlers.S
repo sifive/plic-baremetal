@@ -54,7 +54,7 @@ IRQ_7:
 IRQ_8:
         j default_vector_handler
 IRQ_9:
-		j default_vector_handler
+	j default_vector_handler
 IRQ_10:
         j default_vector_handler
 IRQ_11:
