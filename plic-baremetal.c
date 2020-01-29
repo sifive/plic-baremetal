@@ -54,7 +54,7 @@
 #define MTVEC_MODE_CLIC_VECTORED                0x03
 
 /* We assume PLIC to be at this base address.  Check bsp/metal-platform.h */
-#define PLIC_BASE_ADDR                          METAL_RISCV_PLIC0_C000000_BASE_ADDRESS
+#define PLIC_BASE_ADDR                          METAL_RISCV_PLIC0_0_BASE_ADDRESS
 #define PLIC_PRIORITY_ADDR(plic_int)            (PLIC_BASE_ADDR + (METAL_RISCV_PLIC0_PRIORITY_BASE) + (4*plic_int))
 #define PLIC_PENDING_BASE_ADDR                  (PLIC_BASE_ADDR + METAL_RISCV_PLIC0_PENDING_BASE)
 #define PLIC_ENABLE_BASE_ADDR                   (PLIC_BASE_ADDR + METAL_RISCV_PLIC0_ENABLE_BASE)
