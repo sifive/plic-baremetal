@@ -71,36 +71,7 @@ void interrupt_timer_enable (void);
 void interrupt_timer_disable (void);
 void interrupt_external_enable (void);
 void interrupt_external_disable (void);
-void interrupt_local_enable (uint32_t id);
-
-/* GPIO module and offsets - add more functionality to
- * enable buttons as interrupts using the PLIC */
-/* From gpio@20002000 */
-/*
-#define METAL_SIFIVE_GPIO0_20002000_BASE_ADDRESS 536879104UL
-#define METAL_SIFIVE_GPIO0_0_BASE_ADDRESS 536879104UL
-#define METAL_SIFIVE_GPIO0_20002000_SIZE 4096UL
-#define METAL_SIFIVE_GPIO0_0_SIZE 4096UL
-
-#define METAL_SIFIVE_GPIO0
-#define METAL_SIFIVE_GPIO0_VALUE 0UL
-#define METAL_SIFIVE_GPIO0_INPUT_EN 4UL
-#define METAL_SIFIVE_GPIO0_OUTPUT_EN 8UL
-#define METAL_SIFIVE_GPIO0_PORT 12UL
-#define METAL_SIFIVE_GPIO0_PUE 16UL
-#define METAL_SIFIVE_GPIO0_DS 20UL
-#define METAL_SIFIVE_GPIO0_RISE_IE 24UL
-#define METAL_SIFIVE_GPIO0_RISE_IP 28UL
-#define METAL_SIFIVE_GPIO0_FALL_IE 32UL
-#define METAL_SIFIVE_GPIO0_FALL_IP 36UL
-#define METAL_SIFIVE_GPIO0_HIGH_IE 40UL
-#define METAL_SIFIVE_GPIO0_HIGH_IP 44UL
-#define METAL_SIFIVE_GPIO0_LOW_IE 48UL
-#define METAL_SIFIVE_GPIO0_LOW_IP 52UL
-#define METAL_SIFIVE_GPIO0_IOF_EN 56UL
-#define METAL_SIFIVE_GPIO0_IOF_SEL 60UL
-#define METAL_SIFIVE_GPIO0_OUT_XOR 64UL
-*/
+void interrupt_local_enable (int id);
 
 /* Defines to access CSR registers within C code */
 #define read_csr(reg) ({ unsigned long __tmp; \
@@ -125,7 +96,7 @@ void __attribute__((weak, interrupt)) timer_handler (void);
 void __attribute__((weak, interrupt)) external_handler (void);
 void __attribute__((weak, interrupt)) default_vector_handler (void);
 void __attribute__((weak)) default_exception_handler(void);
-void plic_sw_handler(int);
+void plic_sw_handler(uint32_t);
 
 uint32_t plic_interrupt_lines[METAL_MAX_GLOBAL_EXT_INTERRUPTS];
 uint32_t timer_isr_counter = 0;
