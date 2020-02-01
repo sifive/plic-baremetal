@@ -53,7 +53,7 @@
 #define MTVEC_MODE_CLIC_DIRECT                  0x02
 #define MTVEC_MODE_CLIC_VECTORED                0x03
 
-/* We assume PLIC to be at this base address.  Check bsp/metal-platform.h */
+/* PLIC base address, see: bsp/metal-platform.h */
 #define PLIC_BASE_ADDR                          METAL_RISCV_PLIC0_0_BASE_ADDRESS
 #define PLIC_PRIORITY_ADDR(plic_int)            (PLIC_BASE_ADDR + (METAL_RISCV_PLIC0_PRIORITY_BASE) + (4*plic_int))
 #define PLIC_PENDING_BASE_ADDR                  (PLIC_BASE_ADDR + METAL_RISCV_PLIC0_PENDING_BASE)
@@ -61,8 +61,8 @@
 #define PLIC_THRESHOLD_ADDR                     (PLIC_BASE_ADDR + METAL_RISCV_PLIC0_THRESHOLD)
 #define PLIC_CLAIM_COMPLETE_ADDR                (PLIC_BASE_ADDR + METAL_RISCV_PLIC0_CLAIM)
 
-void plic_enable_disable(int int_id, int en_dis);
-int plic_pending (int int_id);
+void plic_enable_disable(uint32_t int_id, uint32_t en_dis);
+uint32_t plic_pending (uint32_t int_id);
 void interrupt_global_enable (void);
 void interrupt_global_disable (void);
 void interrupt_software_enable (void);
@@ -71,7 +71,7 @@ void interrupt_timer_enable (void);
 void interrupt_timer_disable (void);
 void interrupt_external_enable (void);
 void interrupt_external_disable (void);
-void interrupt_local_enable (int id);
+void interrupt_local_enable (uint32_t id);
 
 /* GPIO module and offsets - add more functionality to
  * enable buttons as interrupts using the PLIC */
@@ -127,14 +127,14 @@ void __attribute__((weak, interrupt)) default_vector_handler (void);
 void __attribute__((weak)) default_exception_handler(void);
 void plic_sw_handler(int);
 
-int plic_interrupt_lines[METAL_MAX_GLOBAL_EXT_INTERRUPTS];
-int timer_isr_counter = 0;
+uint32_t plic_interrupt_lines[METAL_MAX_GLOBAL_EXT_INTERRUPTS];
+uint32_t timer_isr_counter = 0;
 
 /* Main - Setup PLIC interrupt handling and describe how to trigger interrupt */
 int main() {
 
-    int i, mode = MTVEC_MODE_CLINT_VECTORED;
-    int mtvec_base;
+    uint32_t i, mode = MTVEC_MODE_CLINT_VECTORED;
+    uint32_t mtvec_base;
 
     /* Write mstatus.mie = 0 to disable all machine interrupts prior to setup */
     interrupt_global_disable();
@@ -142,7 +142,7 @@ int main() {
     /* Setup mtvec to point to our exception handler table using mtvec.base,
      * and assign mtvec.mode = 1 for CLINT vectored mode of operation. The
      * mtvec.mode field is bit[0] for designs with CLINT, or [1:0] using CLIC */
-    mtvec_base = (int)&__mtvec_clint_vector_table;
+    mtvec_base = (uint32_t)&__mtvec_clint_vector_table;
     write_csr (mtvec, (mtvec_base | mode));
 
 #if PLIC_PRESENT
@@ -228,10 +228,10 @@ void __attribute__((weak, interrupt)) default_vector_handler (void) {
 void __attribute__((weak)) default_exception_handler(void) {
 
     /* Read mcause to understand the exception type */
-    int mcause = read_csr(mcause);
-    int mepc = read_csr(mepc);
-    int mtval = read_csr(mtval);
-    int code = MCAUSE_CODE(mcause);
+    uint32_t mcause = read_csr(mcause);
+    uint32_t mepc = read_csr(mepc);
+    uint32_t mtval = read_csr(mtval);
+    uint32_t code = MCAUSE_CODE(mcause);
 
     printf ("Exception Hit! mcause: 0x%08x, mepc: 0x%08x, mtval: 0x%08x\n", mcause, mepc, mtval);
     printf ("Mcause Exception Code: 0x%08x\n", code);
@@ -242,7 +242,7 @@ void __attribute__((weak)) default_exception_handler(void) {
 }
 
 /* Global software support for different interrupts */
-void plic_sw_handler(int plic_id) {
+void plic_sw_handler(uint32_t plic_id) {
 
     if (plic_id == plic_interrupt_lines[0]) {
         /* Add customization as needed depending on global interrupt source */
@@ -251,12 +251,12 @@ void plic_sw_handler(int plic_id) {
 }
 
 /* One enable bit per interrupt, 4B interrupt enable registers */
-void plic_enable_disable(int int_id, int en_dis) {
+void plic_enable_disable(uint32_t int_id, uint32_t en_dis) {
 
-    int reg = int_id / 32;      /* get index */
-    int bitshift = int_id % 32; /* remainder is bit position */
-    int plic_enable_addr = PLIC_ENABLE_BASE_ADDR + 4*reg;
-    int enable_reg = read_word (plic_enable_addr);
+    uint32_t reg = int_id / 32;      /* get index */
+    uint32_t bitshift = int_id % 32; /* remainder is bit position */
+    uint32_t plic_enable_addr = PLIC_ENABLE_BASE_ADDR + 4*reg;
+    uint32_t enable_reg = read_word (plic_enable_addr);
 
     /* Enable or Disable? */
     if (int_id < 128) {
@@ -276,16 +276,16 @@ void plic_enable_disable(int int_id, int en_dis) {
  * return 0x1 if pending
  * return 0x0 if not pending
  */
-int plic_pending (int int_id) {
+uint32_t plic_pending (uint32_t int_id) {
 
-    int reg = int_id / 32;      /* get index */
-    int bitshift = int_id % 32; /* remainder is bit position */
-    int plic_pending_addr = PLIC_PENDING_BASE_ADDR + 4*reg;
-    int pending_reg = read_word (plic_pending_addr);
+    uint32_t reg = int_id / 32;      /* get index */
+    uint32_t bitshift = int_id % 32; /* remainder is bit position */
+    uint32_t plic_pending_addr = PLIC_PENDING_BASE_ADDR + 4*reg;
+    uint32_t pending_reg = read_word (plic_pending_addr);
 
     /* return single bit for pending status */
     pending_reg >>= bitshift;
-    return pending_reg;
+    return (pending_reg & 0x1);
 }
 
 void interrupt_global_enable (void) {
