@@ -1,11 +1,11 @@
 # plic-baremetal
-This example enables all PLIC interrupts available in the system, based on the PLIC interrupt list in bsp/metal.h.
+This example enables all PLIC interrupts available in the system for hart 0, based on the PLIC interrupt list in bsp/metal.h.
 
 For SiFive standard cores such as E76, U54, and others, the Arty 100T platform can be used to demonstrate the functionality by using the switches which are inputs into the PLIC.  Flipping the switch will trigger the interrupt handler to fire, and a printf message will confirm the handler has been entered.  
 
 This example will only be useful on designs that include interrupt lines into the PLIC that can be asserted in some fashion.
 
-An example design.dts setup is shown below:
+An example design.dts setup is shown below, as this demonstrates the interrupt routing:
 
 The switch node shows interrupt 0 of L15, which is PLIC interrupt 23, below.
 
